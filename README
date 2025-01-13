@@ -1,0 +1,109 @@
+以下是如何使用FastDFS的示例，包括安装、配置和基本操作。
+
+### 安装FastDFS
+
+假设你已经在Docker容器中安装了FastDFS。以下是如何在容器中配置和运行FastDFS的步骤。
+
+### 配置FastDFS
+
+1. **配置Tracker Server**
+
+   创建并编辑`tracker.conf`文件：
+
+   ```sh
+   cp /etc/fdfs/tracker.conf.sample /etc/fdfs/tracker.conf
+   ```
+
+   修改`tracker.conf`文件中的配置，根据需要调整参数。
+
+2. **配置Storage Server**
+
+   创建并编辑`storage.conf`文件：
+
+   ```sh
+   cp /etc/fdfs/storage.conf.sample /etc/fdfs/storage.conf
+   ```
+
+   修改`storage.conf`文件中的配置，特别是`base_path`和`store_path0`。
+
+3. **配置Client**
+
+   创建并编辑`client.conf`文件：
+
+   ```sh
+   cp /etc/fdfs/client.conf.sample /etc/fdfs/client.conf
+   ```
+
+   修改`client.conf`文件中的配置，特别是`base_path`和`tracker_server`。
+
+### 启动FastDFS
+
+1. **启动Tracker Server**
+
+   ```sh
+   fdfs_trackerd /etc/fdfs/tracker.conf start
+   ```
+
+2. **启动Storage Server**
+
+   ```sh
+   fdfs_storaged /etc/fdfs/storage.conf start
+   ```
+
+### 使用FastDFS
+
+1. **上传文件**
+
+   使用`fdfs_test`工具上传文件：
+
+   ```sh
+   fdfs_test /etc/fdfs/client.conf upload /path/to/your/file
+   ```
+
+   你会得到一个文件ID，例如：`group1/M00/00/00/wKgZhV9gAq2AejyRAAAABbbCwzI123.jpg`
+
+2. **下载文件**
+
+   使用`fdfs_test`工具下载文件：
+
+   ```sh
+   fdfs_test /etc/fdfs/client.conf download group1/M00/00/00/wKgZhV9gAq2AejyRAAAABbbCwzI123.jpg /path/to/save/file
+   ```
+
+3. **删除文件**
+
+   使用`fdfs_test`工具删除文件：
+
+   ```sh
+   fdfs_test /etc/fdfs/client.conf delete group1/M00/00/00/wKgZhV9gAq2AejyRAAAABbbCwzI123.jpg
+   ```
+
+### 示例脚本
+
+以下是一个示例脚本，展示了如何上传、下载和删除文件：
+
+```sh
+#!/bin/bash
+
+# 上传文件
+upload_result=$(fdfs_test /etc/fdfs/client.conf upload /path/to/your/file)
+file_id=$(echo "$upload_result" | grep 'group1' | awk '{print $3}')
+
+echo "Uploaded file ID: $file_id"
+
+# 下载文件
+fdfs_test /etc/fdfs/client.conf download $file_id /path/to/save/file
+
+# 删除文件
+fdfs_test /etc/fdfs/client.conf delete $file_id
+
+echo "File $file_id has been deleted."
+```
+
+### 注意事项
+
+- 确保`tracker.conf`和`storage.conf`中的路径和端口配置正确。
+- 确保`client.conf`中的`tracker_server`配置正确，指向Tracker Server的IP和端口。
+- 根据需要调整配置文件中的其他参数。
+
+这样，你就可以在Docker容器中配置和使用FastDFS了。
